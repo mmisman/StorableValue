@@ -1,0 +1,17 @@
+{
+    "name": "Mmisman.StorableValue.Runtime.Tests",
+    "references": [
+        "GUID:c24b96e32001d42f38984c7802d9d705"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}
