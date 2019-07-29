@@ -2,7 +2,7 @@ StorableValue is a set of interfaces that helps you save, load and revert variou
 
 ## Features
 
-- bool, int, float, string, rect, rectInt, Vector2, Vector2Int, Vector3, Vector3Int, Vector4, Vector4Int, Quaternion 형식을 지원합니다.
+- bool, int, float, string, rect, rectInt, Vector2, Vector2Int, Vector3, Vector3Int, Vector4, Quaternion 형식을 지원합니다.
 - PlayerPrefs을 통해 값을 저장하고 불러옵니다.
 - PlayerPrefs을 확장하여 다양한 형식(bool, Rect, Vector3 등)의 저장 기능을 지원합니다.
 - 필드/프로퍼티로 생성 시, getterFunc와 setterFunc를 정의할 수 있습니다(프로퍼티 생성 시 get, set 메소드와 같은 기능).
