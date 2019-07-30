@@ -35,3 +35,7 @@ StorableValue 자체만으로도 저장 기능이 매우 편리해지지만, 변
 ## StorableReference
 
 일반 프로퍼티를 별도의 StorableValue와 연결합니다.
+
+## ToDo
+
+- StorableEnum 만드는 법

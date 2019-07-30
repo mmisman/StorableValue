@@ -92,5 +92,63 @@ namespace Mmisman.StorableValue
 			PlayerPrefs.SetString(key, tmp);
 		}
 		#endregion
+
+		#region Quaternion
+		public static Quaternion GetQuaternion(string key, Quaternion defaultValue = default)
+		{
+			string[] tmp = PlayerPrefs.GetString(key, $"{defaultValue.x}|{defaultValue.y}|{defaultValue.z}|{defaultValue.w}").Split('|');
+			Quaternion result = new Quaternion(float.Parse(tmp[0]), float.Parse(tmp[1]), float.Parse(tmp[2]), float.Parse(tmp[3]));
+			return result;
+		}
+
+		public static void SetQuaternion(string key, Quaternion value)
+		{
+			string tmp = $"{value.x}|{value.y}|{value.z}|{value.w}";
+			PlayerPrefs.SetString(key, tmp);
+		}
+		#endregion
+
+		#region Rect
+		public static Rect GetRect(string key, Rect defaultValue = default)
+		{
+			string[] tmp = PlayerPrefs.GetString(key, $"{defaultValue.x}|{defaultValue.y}|{defaultValue.width}|{defaultValue.height}").Split('|');
+			Rect result = new Rect(float.Parse(tmp[0]), float.Parse(tmp[1]), float.Parse(tmp[2]), float.Parse(tmp[3]));
+			return result;
+		}
+
+		public static void SetRect(string key, Rect value)
+		{
+			string tmp = $"{value.x}|{value.y}|{value.width}|{value.height}";
+			PlayerPrefs.SetString(key, tmp);
+		}
+		#endregion
+
+		#region RectInt
+		public static RectInt GetRectInt(string key, RectInt defaultValue = default)
+		{
+			string[] tmp = PlayerPrefs.GetString(key, $"{defaultValue.x}|{defaultValue.y}|{defaultValue.width}|{defaultValue.height}").Split('|');
+			RectInt result = new RectInt(int.Parse(tmp[0]), int.Parse(tmp[1]), int.Parse(tmp[2]), int.Parse(tmp[3]));
+			return result;
+		}
+
+		public static void SetRectInt(string key, RectInt value)
+		{
+			string tmp = $"{value.x}|{value.y}|{value.width}|{value.height}";
+			PlayerPrefs.SetString(key, tmp);
+		}
+		#endregion
+
+		#region Enum
+		public static T GetEnum<T>(string key, T defaultValue = default) where T : struct
+		{
+			int tmp = PlayerPrefs.GetInt(key, (int)(object)defaultValue);
+			return (T)System.Enum.ToObject(typeof(T), tmp);
+		}
+
+		public static void SetEnum<T>(string key, T value) where T : struct
+		{
+			PlayerPrefs.SetInt(key, (int)(object)value);
+		}
+		#endregion
 	}
 }
