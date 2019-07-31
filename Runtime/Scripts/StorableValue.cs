@@ -11,7 +11,7 @@ namespace Mmisman.StorableValue
 		/// <summary>
 		/// The string identifier to store <see cref="Value"/> in <see cref="PlayerPrefs"/>.
 		/// </summary>
-		public string Key { get { return key; } set { key = value; } }
+		public string Key { get { return key; } set { AssertKeyShouldNotBeNullOrEmpty(value); key = value; } }
 		/// <summary>
 		/// The storeable value.
 		/// </summary>
@@ -45,16 +45,20 @@ namespace Mmisman.StorableValue
 		protected StorableValue(string key, T value) : this(key, value, g => g, s => s) { }
 		protected StorableValue(string key, T value, System.Func<T, T> getterFunc, System.Func<T, T> setterFunc)
 		{
-			if (string.IsNullOrEmpty(key))
-			{
-				throw new System.ArgumentNullException(nameof(key), "The key should not be null or empty.");
-			}
-
+			AssertKeyShouldNotBeNullOrEmpty(key);
 			this.getterFunc = getterFunc ?? throw new System.ArgumentNullException(nameof(getterFunc), "The getterFunc should not be null.");
 			this.setterFunc = setterFunc ?? throw new System.ArgumentNullException(nameof(setterFunc), "The setterFunc should not be null.");
 
 			this.key = key;
 			this.defaultValue = this.value = this.setterFunc(value);
+		}
+
+		void AssertKeyShouldNotBeNullOrEmpty(string key)
+		{
+			if (string.IsNullOrEmpty(key))
+			{
+				throw new System.ArgumentNullException(nameof(key), "The key should not be null or empty.");
+			}
 		}
 
 		public static implicit operator T(StorableValue<T> value) { return value.Value; }
@@ -107,6 +111,11 @@ namespace Mmisman.StorableValue
 		{
 			Value = defaultValue;
 			Reverted?.Invoke(value);
+		}
+
+		public override string ToString()
+		{
+			return $"(Key: {key}, Value: {value}, DefaultValue: {defaultValue}, SavedValue: {SavedValue})";
 		}
 	}
 }
