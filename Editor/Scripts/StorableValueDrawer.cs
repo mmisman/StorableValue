@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿// TODO: 어레이 작동 확인
+// 인스펙터 변경시 Saved 이벤트 불려야됨?
+// 저장값 리셋(clear)하면 savedValue가 default 값으로? 아님 defaultValue? value? 어떤걸로 가야함?
+
+using UnityEngine;
 using UnityEditor;
 
 namespace Mmisman.StorableValue
@@ -8,13 +12,10 @@ namespace Mmisman.StorableValue
 		protected SerializedProperty keyProperty, valueProperty, defaultValueProperty;
 
 		protected Rect controlRect;
-		protected float labelWidth = 12f, gapWidth = 2f;
-		float defaultLabelWidth;
-		int defaultIndentLevel;
-		Color defaultBackgroundColor;
+		protected readonly float labelWidth = 12f, gapWidth = 5f;
 
-		Color32 colorOnSaved = new Color32(0, 161, 223, 255);
-		Color32 colorOnNotSaved = new Color32(255, 0, 41, 255);
+		readonly Color32 colorOnSaved = new Color32(0, 161, 223, 255);
+		readonly Color32 colorOnNotSaved = new Color32(255, 0, 41, 255);
 
 		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
 		{
@@ -50,16 +51,18 @@ namespace Mmisman.StorableValue
 		void DrawControls(SerializedProperty property)
 		{
 			InitControlStyles();
-			DrawKeyProperty(property);
-			DrawValueProperty();
-			DrawDefaultValueProperty();
-			//DrawSavedValueProperty();
-			//RestoreEditorGUI();
+			DrawSerializedKey(property);
+			DrawSerializedValue();
+			DrawSerialziedDefaultValue();
+			DrawSavedValue();
+			RestoreControlStyles();
 		}
 
-		protected virtual void InitControlStyles()
+		int defaultIndentLevel;
+		float defaultLabelWidth;
+		void InitControlStyles()
 		{
-			// Need to show array's labels.
+			// Followings are needed to show array's labels correctly.
 			defaultIndentLevel = EditorGUI.indentLevel;
 			EditorGUI.indentLevel = 0;
 
@@ -67,22 +70,28 @@ namespace Mmisman.StorableValue
 			EditorGUIUtility.labelWidth = labelWidth;
 		}
 
-		void DrawKeyProperty(SerializedProperty property)
+		void RestoreControlStyles()
 		{
-			DrawKeyLabelAndPropertyField();
+			EditorGUI.indentLevel = defaultIndentLevel;
+			EditorGUIUtility.labelWidth = defaultLabelWidth;
+		}
+
+		void DrawSerializedKey(SerializedProperty property)
+		{
+			DrawKeyPropertyField();
 			FillKeyPropertyIfEmpty(property.propertyPath);
 		}
 
 		// Draggable property: https://answers.unity.com/questions/606325/how-do-i-implement-draggable-properties-with-custo.html
-		protected virtual void DrawKeyLabelAndPropertyField()
+		void DrawKeyPropertyField()
 		{
 			EditorGUI.PropertyField(GetPropertyRect(0), keyProperty, new GUIContent("K", "Key"));
 		}
 
 		// Vector3-like drawing: https://forum.unity.com/threads/making-a-proper-drawer-similar-to-vector3-how.385532/
-		Rect GetPropertyRect(int ith)
+		protected virtual Rect GetPropertyRect(int ith)
 		{
-			float propertyWidth = controlRect.width * 0.25f - gapWidth * 3f;
+			float propertyWidth = (controlRect.width - gapWidth * 3f) * 0.25f;
 			float posX = controlRect.x + (propertyWidth + gapWidth) * ith;
 			return new Rect(posX, controlRect.y, propertyWidth, controlRect.height);
 		}
@@ -95,116 +104,72 @@ namespace Mmisman.StorableValue
 			}
 		}
 
-		void DrawValueProperty()
+		void DrawSerializedValue()
 		{
-			DrawValueLabelAndPropertyField();
+			EditorGUI.BeginChangeCheck();
+			DrawValuePropertyField();
+			if (EditorGUI.EndChangeCheck() && !EditorApplication.isPlaying)
+			{
+				SyncDefaultValueWithtValue();
+			}
 		}
 
-		protected virtual void DrawValueLabelAndPropertyField()
+		void DrawValuePropertyField()
 		{
 			EditorGUI.PropertyField(GetPropertyRect(1), valueProperty, new GUIContent("V", "Value"));
 		}
 
-		void DrawDefaultValueProperty()
+		protected abstract void SyncDefaultValueWithtValue();
+
+		void DrawSerialziedDefaultValue()
 		{
-			SetDefaultValueProperty();
-			DrawDefaultValueLabelAndPropertyField();
+			DrawDefaultValuePropertyField();
 		}
 
-		protected abstract void SetDefaultValueProperty();
-
-		protected virtual void DrawDefaultValueLabelAndPropertyField()
+		void DrawDefaultValuePropertyField()
 		{
 			EditorGUI.BeginDisabledGroup(true);
 			EditorGUI.PropertyField(GetPropertyRect(2), defaultValueProperty, new GUIContent("D", "Default value"));
 			EditorGUI.EndDisabledGroup();
 		}
 
-		//void DrawSavedValueProperty()
-		//{
-		//	EditorGUI.BeginChangeCheck();
-		//	DrawSavedValuePropertyAndBackground();
-		//	if (EditorGUI.EndChangeCheck())
-		//	{
-		//		Undo.RecordObjects(savedValueProperty.serializedObject.targetObjects, "Saved Value Change");
-		//		PlayerPrefsEliteUtility.MakePlayerPrefsEliteAvailableInEditMode();
-		//		ApplyChangeToInspectedSavedValues();
-		//		SaveChangeToInspectedToryValues();
-		//	}
-		//	if (SavedButInconsistent())
-		//	{
-		//		PlayerPrefsEliteUtility.MakePlayerPrefsEliteAvailableInEditMode();
-		//		FetchInspectedToryValueSavedValue();
-		//	}
-		//}
+		void DrawSavedValue()
+		{
+			CacheBackgroundColor();
+			DrawBackground();
+			DrawSavedValueField();
+			RestoreBackgroundColor();
+		}
 
-		//void DrawSavedValuePropertyAndBackground()
-		//{
-		//	CacheBackgroundColor();
-		//	DrawBackground();
-		//	DrawSavedValueLabelField();
-		//	DrawSavedValuePropertyField();
-		//	RestoreBackgroundColor();
-		//}
+		Color defaultBackgroundColor;
+		void CacheBackgroundColor()
+		{
+			defaultBackgroundColor = GUI.backgroundColor;
+		}
 
-		//void CacheBackgroundColor()
-		//{
-		//	cachedBackgroundColor = GUI.backgroundColor;
-		//}
+		void RestoreBackgroundColor()
+		{
+			GUI.backgroundColor = defaultBackgroundColor;
+		}
 
-		//void DrawBackground()
-		//{
-		//	GUI.backgroundColor = Saved() ? (Color)colorOnSaved : (Color)colorOnNotSaved;
-		//}
+		void DrawBackground()
+		{
+			GUI.backgroundColor = PlayerPrefs.HasKey(keyProperty.stringValue) ? (Color)colorOnSaved : (Color)colorOnNotSaved;
+		}
 
-		//protected abstract bool Saved();
+		void DrawSavedValueField()
+		{
+			EditorGUI.BeginChangeCheck();
+			string tooltip = $"Saved value ({(PlayerPrefs.HasKey(keyProperty.stringValue) ? "saved" : "not saved")})";
+			T savedValue = DrawSavedValue(GetPropertyRect(3), new GUIContent("S", tooltip));
+			if (EditorGUI.EndChangeCheck())
+			{
+				Save(savedValue);
+			}
+		}
 
-		//protected virtual void DrawSavedValueLabelField()
-		//{
-		//	// We draw the both label and property fields in the DrawSavedPropertyField method.
-		//}
+		protected abstract T DrawSavedValue(Rect rect, GUIContent label);
 
-		//protected virtual void DrawSavedValuePropertyField()
-		//{
-		//	Rect savedValuePosition = GetRelativePropertyPositionAt(3);
-		//	string tooltip = "Saved value (" + (Saved() ? "saved" : "not saved") + ")";
-		//	EditorGUI.PropertyField(savedValuePosition, savedValueProperty, new GUIContent("S", tooltip));
-		//}
-
-		//void RestoreBackgroundColor()
-		//{
-		//	GUI.backgroundColor = cachedBackgroundColor;
-		//}
-
-		//void ApplyChangeToInspectedSavedValues()
-		//{
-		//	for (int i = 0; i < insprectedStorableValues.Length; i++)
-		//	{
-		//		ApplyChangeToInspectedSavedValue(insprectedStorableValues[i]);
-		//		PrefabUtility.RecordPrefabInstancePropertyModifications(savedValueProperty.serializedObject.targetObjects[i]);
-		//	}
-		//}
-
-		//protected abstract void ApplyChangeToInspectedSavedValue(ToryValue<T> toryValue);
-
-		//void SaveChangeToInspectedToryValues()
-		//{
-		//	for (int i = 0; i < insprectedStorableValues.Length; i++)
-		//	{
-		//		SaveInspectedToryValue(insprectedStorableValues[i]);
-		//	}
-		//}
-
-		//protected abstract void SaveInspectedToryValue(ToryValue<T> toryValue);
-
-		//protected abstract bool SavedButInconsistent();
-
-		//protected abstract void FetchInspectedToryValueSavedValue();
-
-		//void RestoreEditorGUI()
-		//{
-		//	EditorGUI.indentLevel = cachedIndentLevel;
-		//	EditorGUIUtility.labelWidth = cachedLabelWidth;
-		//}
+		protected abstract void Save(T value);
 	}
 }

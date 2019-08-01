@@ -13,10 +13,12 @@ StorableValue is a set of interfaces that helps you save, load and revert variou
 - 내부 Key, Value 필드는 인스펙터를 통해 언제든 값을 변경할 수 있습니다.
 - 시리얼라이즈된 StorableValue의 Key를 지정하지 않으면(즉, null이면) 변수명으로 자동 초기화된다. 왠만하면 변경하자!
 - Key는 null일 수 없다. 초기화할 때든 프로퍼티를 지정할 때든!
-- 내부 DefaultValue 필드는 시리얼라이즈된 플레이 전 초기값을 보여주며 수정할 수 없다. Key, Value 필드는 수정 가능합니다. 플레이 모드가 아닐 때는 Value 값을 따라가지만, 플레이 모드에서는 플레이 진적의 값이 유지된다.
+- DefaultValue 필드는 수정 불가능하다. 에딧 모드에서는 항상 Value 필드와 동기화되며, 플레이 모드일 때는 플레이 직전의 값이 유지된다.
+- Key, Value 필드는 수정 가능합니다.
+- SavedValue는 PlayerPrefs를 직접 변경하는 것입니다. SavedValue는 시리얼라이즈되지 않는다. 그냥 PlayerPrefs에 저장된 내용을 보여줄 뿐이다. 때문에 에디터 또는 런타임시에 저장값이 바뀔때마다 씬이 더티가 되지 않고, undo가 불가능하다. 주의! 시러얼라이즈 안됨.
 - SavedValue는 PlayerPrefs에 저장된 값을 보여주며, 저장되어 있는 경우 파란색, 그렇지 않은 경우 빨간색으로 필드가 표시됩니다.
-- SavedValue는 시리얼라이즈되지 않는다. 그냥 PlayerPrefs에 저장된 내용을 보여줄 뿐이다. 에디터 또는 런타임시에 저장값이 바뀔때마다 씬이 더티가 되는 것을 막기 위함이다.
 - 초기화는 유니티 시리얼라이즈를 이용하거나 new 연산자를 이용할 수 있습니다.
+- Multi-Object Editing을 지원한다.
 
 ## 참고하면 좋은 내용
 
