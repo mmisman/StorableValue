@@ -1,8 +1,4 @@
-﻿// TODO: 어레이 작동 확인
-// 인스펙터 변경시 Saved 이벤트 불려야됨?
-// 저장값 리셋(clear)하면 savedValue가 default 값으로? 아님 defaultValue? value? 어떤걸로 가야함?
-
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 
 namespace Mmisman.StorableValue
@@ -12,7 +8,7 @@ namespace Mmisman.StorableValue
 		protected SerializedProperty keyProperty, valueProperty, defaultValueProperty;
 
 		protected Rect controlRect;
-		protected readonly float labelWidth = 12f, gapWidth = 5f;
+		protected readonly float labelWidth = 12f, gapWidth = 2f;
 
 		readonly Color32 colorOnSaved = new Color32(0, 161, 223, 255);
 		readonly Color32 colorOnNotSaved = new Color32(255, 0, 41, 255);
@@ -155,21 +151,22 @@ namespace Mmisman.StorableValue
 		void DrawBackground()
 		{
 			GUI.backgroundColor = PlayerPrefs.HasKey(keyProperty.stringValue) ? (Color)colorOnSaved : (Color)colorOnNotSaved;
+			if (keyProperty.hasMultipleDifferentValues)
+			{
+				GUI.backgroundColor = defaultBackgroundColor;
+			}
 		}
 
 		void DrawSavedValueField()
 		{
-			EditorGUI.BeginChangeCheck();
+			EditorGUI.BeginDisabledGroup(true);
+			EditorGUI.showMixedValue = keyProperty.hasMultipleDifferentValues;
 			string tooltip = $"Saved value ({(PlayerPrefs.HasKey(keyProperty.stringValue) ? "saved" : "not saved")})";
-			T savedValue = DrawSavedValue(GetPropertyRect(3), new GUIContent("S", tooltip));
-			if (EditorGUI.EndChangeCheck())
-			{
-				Save(savedValue);
-			}
+			DrawSavedValue(GetPropertyRect(3), new GUIContent("S", tooltip));
+			EditorGUI.showMixedValue = false;
+			EditorGUI.EndDisabledGroup();
 		}
 
-		protected abstract T DrawSavedValue(Rect rect, GUIContent label);
-
-		protected abstract void Save(T value);
+		protected abstract void DrawSavedValue(Rect rect, GUIContent label);
 	}
 }
