@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace Mmisman.StorableValue
+namespace Mmisman.StorableValue.Editor
 {
 	public abstract class StorableValueMultilineDrawer<T> : StorableValueDrawer<T>
 	{

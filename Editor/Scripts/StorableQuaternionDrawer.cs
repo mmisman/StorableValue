@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace Mmisman.StorableValue
+namespace Mmisman.StorableValue.Editor
 {
 	[CustomPropertyDrawer(typeof(StorableQuaternion))]
 	public class StorableQuaternionDrawer : StorableValueMultilineDrawer<Quaternion>

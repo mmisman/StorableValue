@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace Mmisman.StorableValue
+namespace Mmisman.StorableValue.Editor
 {
 	[CustomPropertyDrawer(typeof(StorableVector2Int))]
 	public class StorableVector2IntDrawer : StorableValueMultilineDrawer<Vector2Int>

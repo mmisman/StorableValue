@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace Mmisman.StorableValue
+namespace Mmisman.StorableValue.Editor
 {
 	[CustomPropertyDrawer(typeof(StorableBool))]
 	public class StorableBoolDrawer : StorableValueDrawer<bool>
