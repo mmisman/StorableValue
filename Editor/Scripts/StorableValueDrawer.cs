@@ -47,9 +47,9 @@ namespace Mmisman.StorableValue
 		void DrawControls(SerializedProperty property)
 		{
 			InitControlStyles();
-			DrawSerializedKey(property);
-			DrawSerializedValue();
-			DrawSerialziedDefaultValue();
+			DrawKey(property);
+			DrawValue();
+			DrawDefaultValue();
 			DrawSavedValue();
 			RestoreControlStyles();
 		}
@@ -72,14 +72,14 @@ namespace Mmisman.StorableValue
 			EditorGUIUtility.labelWidth = defaultLabelWidth;
 		}
 
-		void DrawSerializedKey(SerializedProperty property)
+		void DrawKey(SerializedProperty property)
 		{
-			DrawKeyPropertyField();
-			FillKeyPropertyIfEmpty(property.propertyPath);
+			DrawKeyField();
+			FillKeyFieldIfEmpty(property.propertyPath);
 		}
 
 		// Draggable property: https://answers.unity.com/questions/606325/how-do-i-implement-draggable-properties-with-custo.html
-		void DrawKeyPropertyField()
+		void DrawKeyField()
 		{
 			EditorGUI.PropertyField(GetPropertyRect(0), keyProperty, new GUIContent("K", "Key"));
 		}
@@ -87,12 +87,12 @@ namespace Mmisman.StorableValue
 		// Vector3-like drawing: https://forum.unity.com/threads/making-a-proper-drawer-similar-to-vector3-how.385532/
 		protected virtual Rect GetPropertyRect(int ith)
 		{
-			float propertyWidth = (controlRect.width - gapWidth * 3f) * 0.25f;
+			float propertyWidth = (controlRect.width - gapWidth * 3f) * .25f;
 			float posX = controlRect.x + (propertyWidth + gapWidth) * ith;
 			return new Rect(posX, controlRect.y, propertyWidth, controlRect.height);
 		}
 
-		void FillKeyPropertyIfEmpty(string key)
+		void FillKeyFieldIfEmpty(string key)
 		{
 			if (keyProperty.stringValue.Equals(""))
 			{
@@ -100,33 +100,33 @@ namespace Mmisman.StorableValue
 			}
 		}
 
-		void DrawSerializedValue()
+		void DrawValue()
 		{
 			EditorGUI.BeginChangeCheck();
-			DrawValuePropertyField();
+			DrawValueField(GetPropertyRect(1), new GUIContent("V", "Value"));
 			if (EditorGUI.EndChangeCheck() && !EditorApplication.isPlaying)
 			{
 				SyncDefaultValueWithtValue();
 			}
 		}
 
-		void DrawValuePropertyField()
+		protected virtual void DrawValueField(Rect rect, GUIContent label)
 		{
-			EditorGUI.PropertyField(GetPropertyRect(1), valueProperty, new GUIContent("V", "Value"));
+			EditorGUI.PropertyField(rect, valueProperty, label);
 		}
 
 		protected abstract void SyncDefaultValueWithtValue();
 
-		void DrawSerialziedDefaultValue()
-		{
-			DrawDefaultValuePropertyField();
-		}
-
-		void DrawDefaultValuePropertyField()
+		void DrawDefaultValue()
 		{
 			EditorGUI.BeginDisabledGroup(true);
-			EditorGUI.PropertyField(GetPropertyRect(2), defaultValueProperty, new GUIContent("D", "Default value"));
+			DrawDefaultValueField(GetPropertyRect(2), new GUIContent("D", "Default value"));
 			EditorGUI.EndDisabledGroup();
+		}
+
+		protected virtual void DrawDefaultValueField(Rect rect, GUIContent label)
+		{
+			EditorGUI.PropertyField(rect, defaultValueProperty, label);
 		}
 
 		void DrawSavedValue()
@@ -162,11 +162,11 @@ namespace Mmisman.StorableValue
 			EditorGUI.BeginDisabledGroup(true);
 			EditorGUI.showMixedValue = keyProperty.hasMultipleDifferentValues;
 			string tooltip = $"Saved value ({(PlayerPrefs.HasKey(keyProperty.stringValue) ? "saved" : "not saved")})";
-			DrawSavedValue(GetPropertyRect(3), new GUIContent("S", tooltip));
+			DrawSavedValueField(GetPropertyRect(3), new GUIContent("S", tooltip));
 			EditorGUI.showMixedValue = false;
 			EditorGUI.EndDisabledGroup();
 		}
 
-		protected abstract void DrawSavedValue(Rect rect, GUIContent label);
+		protected abstract void DrawSavedValueField(Rect rect, GUIContent label);
 	}
 }

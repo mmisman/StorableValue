@@ -11,7 +11,7 @@ namespace Mmisman.StorableValue
 			defaultValueProperty.floatValue = valueProperty.floatValue;
 		}
 
-		protected override void DrawSavedValue(Rect rect, GUIContent label)
+		protected override void DrawSavedValueField(Rect rect, GUIContent label)
 		{
 			EditorGUI.FloatField(rect, label, PlayerPrefs.GetFloat(keyProperty.stringValue));
 		}
