@@ -1,49 +1,169 @@
-StorableValue is a set of interfaces that helps you save, load and revert various types of values in a simple way.
+# StorableValue
+
+StorableValue helps you easily save, load and revert various types of values.
+
+## Installation
+
+Find the `Packages/manifest.json` file in your project and add the following line inside of the `depencencies` block:
+
+```json
+"com.mmisman.storable-value": "https://github.com/mmisman/StorableValue.git"
+```
+
+Done!
+
+### Requirements
+
+- Unity 2019.1 or later
+- Git
 
 ## Features
 
-- bool, int, float, string, rect, rectInt, Vector2, Vector2Int, Vector3, Vector3Int, Vector4, Quaternion 형식을 지원합니다.
-- PlayerPrefs을 통해 값을 저장하고 불러옵니다.
-- PlayerPrefs을 확장하여 다양한 형식(bool, Rect, Vector3 등)의 저장 기능을 지원합니다.
-- 필드/프로퍼티로 생성 시, getterFunc와 setterFunc를 정의할 수 있습니다(프로퍼티 생성 시 get, set 메소드와 같은 기능).
-- Changed, Saved, Loaded, Reverted 이벤트를 제공합니다.
-- Save(), Load(), Revert() 메소드를 제공합니다.
-- StorableXXX에서 XXX로 묵시적 형변환이 가능합니다.
-- 모든 StorableValue는 유니티 에디터와 시리얼라이즈되기 때문에 인스펙터에서 값을 확인할 수 있습니다.
-- 내부 Key, Value 필드는 인스펙터를 통해 언제든 값을 변경할 수 있습니다.
-- 시리얼라이즈된 StorableValue의 Key를 지정하지 않으면(즉, null이면) 변수명으로 자동 초기화된다. 왠만하면 변경하자!
-- Key는 null일 수 없다. 초기화할 때든 프로퍼티를 지정할 때든!
-- DefaultValue 필드는 수정 불가능하다. 에딧 모드에서는 항상 Value 필드와 동기화되며, 플레이 모드일 때는 플레이 직전의 값이 유지된다.
-- Key, Value 필드는 수정 가능합니다.
-- SavedValue는 PlayerPrefs를 직접 변경하는 것입니다. SavedValue는 시리얼라이즈되지 않는다. 그냥 PlayerPrefs에 저장된 내용을 보여줄 뿐이다. 때문에 에디터 또는 런타임시에 저장값이 바뀔때마다 씬이 더티가 되지 않는다. 필드 수정이 불가능.
-- SavedValue가 직렬화되지 않는 이유: 인스펙터의 SavedValue 필드는 PlayerPrefs에 저장된 값을 그대로 보여주기 때문에 에디터와 직렬화되지 않는다. 때문에 플레이 모드 중에 값을 저장하면 플레이 모드가 끝나더라도 보여지는 값이 유지된다. 만약 SavedValue가 직렬화된다면 저장할 때마다 에디터는 쓸데 없이 더티 상태가 되어 버리게 되는데, 이러한 상황은 적절하지 않다.
-- SavedValue가 수정 불가능한 이유: SavedValue는 빌드 후 다른 PlayerPrefs 저장소를 참조하므로 에디터에서 값을 설정하는 것이 무의미하다. (빌드 후에는 어차피 이 값이 쓰이지 않는다..)
-- DefaultValue가 수정 불가능한 이유: 초기값을 값과 다르게 설정할 이유가 전혀 없다. 그렇게 된다면 신경써야 하는 값만 늘어나게 되는 것이다. 초기값의 의미는 빌드 시 설정된 value 값이다.
-- SavedValue는 PlayerPrefs에 저장된 값을 보여주며, 저장되어 있는 경우 파란색, 그렇지 않은 경우 빨간색으로 필드가 표시됩니다.
-- 초기화는 유니티 시리얼라이즈를 이용하거나 new 연산자를 이용할 수 있습니다.
-- Multi-Object Editing을 지원한다.
+### Save and Load
 
-## 참고하면 좋은 내용
+StorableValue는 유니티의 PlayerPrefs를 이용하여 다양한 형식의 값을 저장하고 불러옵니다. 내부적으로 int, float, string 밖에 지원하지 않는 PlayerPrefs를 확장하여 구현하였지만, 사용자는 이와 관련한 귀찮은 일을 신경쓰지 않아도 됩니다. 저장, 불러오기 기능을 사용하고 싶다면, 원하는 시점에 `Save()`, `Load()` 메소드를 호출하기만 하면 됩니다. 지원하는 형식은 bool, int, float, string, Rect, RectInt, Vector2, Vector2Int, Vector3, Vector3Int, Vector4, Quaternion으로, Storable 뒤에 형식명을 Pascal case로 붙여주면 됩니다.
 
-- struct이 아닌 class로 구현되어 있습니다.
+```c#
+using UnityEngine;
+using Mmisman.StorableValue; // StorableValue를 사용하기 위한 네임스페이스
 
-## struct이 아닌 class로 구현된 이유
+public class VolumeController : MonoBehaviour
+{
+  StorableFloat volume = new StorableFloat("volume", .7f);
 
-- 생성되는 경우보다 대입/참조하는 경우가 많아 struct보다 class가 퍼포먼스 면에서 유리합니다.
-- 하나의 인스턴스를 여러 곳에서 공유해서 사용하므로 값이 아닌 참조가 복사되는 class가 사용하기 편합니다.
-- 내부에 참조 형식 필드(키)를 가지고 있어 여러 곳에서 사용할 수록 가비지 컬랙션에 부정적으로 작용합니다.
+  void Start()
+  {
+    volume.Load();
+  }
 
-## StorableUiComponent
+  void Update()
+  {
+    if (Input.GetKeyUp(KeyCode.UpArrow))
+    {
+      volume.Value += .1f;
+      volume.Save();
+    }
+    else if (Input.GetKeyUp(KeyCode.DownArrow))
+    {
+      volume.Value -= .1f;
+      volume.Save();
+    }
+    else if (Input.GetKeyUp(KeyCode.Space))
+    {
+      Debug.Log(string.Format("Saved value: {0}", volume.SavedValue));
+    }
+  }
+}
+```
 
-StorableValue 자체만으로도 저장 기능이 매우 편리해지지만, 변수를 선언하는 시점에 변수의 저장 여부를 정해야 한다는 부담이 있습니다. 이는 반대로, 저장할 줄 몰랐던 변수가 저장할 필요가 생겼을 때, 변수 선언부의 형식을 변경해야하고, 그 결과 변수가 사용되는 코드의 많은 부분을 함께 수정해야 한다는 걸 의미합니다. 예를 들어, 최초 게임의 개발 시에 게임플레이의 제한 시간을 60초로 설정했으나 난이도가 너무 쉽다고 판단되어 난이도를 조절 가능하도록 저장/불러오기/초기화 기능을 추가하고 싶을 때, 게임플레이의 제한 시간을 StorableValue 형식으로 변경하고 이와 관련된 코드의 모든 부분을 변경해야만 합니다. 이러한 코드의 디자인은 StorableValue를 가지는 클래스가 책임질 필요 없는 필드의 저장 기능까지 클래스에 포함시키고, 그 결과 코드의 변화에 민감하게 반응하게 됩니다. 이는 객체 지향 프로그래밍의 주요 원칙인 단일 책임 원칙과 개방-폐쇄 원칙을 어기는 디자인입니다. 이 문제를 해결하기 위해 필드와 저장 기능을 분리하여 모듈화 한 패턴을 사용할 수 있도록 한 것이 StorableReference입니다.
+위 예제는 저장 가능한 float 형식의 volume 인스턴스를 선언하고 키-값 쌍을 제공하여 정의하였습니다. 저장/불러오기 기능을 위해서 키 인자는 필수로 제공되어야 하지만, 값 인자는 생략될 수 있습니다. 그러면 해당 형식의 기본값으로 초기화됩니다. 참고로 키 인자는 비어있거나 null일 수 없습니다.
 
-일반 프로퍼티를 유니티 UI의 SelectableComponent와 연결하여 저장/불러오기/초기화를 가능하게 합니다.
+```c#
+StorableValue<float> volume = new StorableFloat("volume"); // 기본값인 0f로 초기화
+```
 
-## StorableReference
+플레이가 시작되면 이미 저장된 값을 한번 불러옵니다. 만약 이전에 저장된 값이 없다면 변화 없이 현재 값이 그대로 유지됩니다. 플레이 중 위 화살표가 눌리면 볼륨을 키우고 저장, 아래 화살표가 눌리면 볼륨을 줄이고 저장합니다. `SavedValue` 프로퍼티로 현재 PlayerPrefs에 저장된 값을 확인할 수 있습니다.
 
-일반 프로퍼티를 별도의 StorableValue와 연결합니다.
+### Revert
 
-## ToDo
+StorableValue는 값의 초기화 기능도 제공합니다. `Revert()` 메소드를 호출하면 빌드 전(에디터에서는 플레이 모드 전)의 세팅값으로 돌아갑니다. `DefaultValue` 프로퍼티로 초기값을 확인할 수 있습니다.
 
-- StorableEnum 만드는 법
-- 사이즈가 저장되는 Array, List 제공
+```c#
+void Update()
+{
+  if (Input.GetKeyUp(KeyCode.R))
+  {
+    volume.Revert();	// volume.Value를 초기값인 0.7로 되돌립니다.
+  }
+  else if (Input.GetKeyUp(KeyCode.Space))
+  {
+    Debug.Log(string.Format("Default value: {0}", volume.DefaultValue));
+  }
+}
+```
+
+### Unity Serialization
+
+모든 StorableValue는 필드의 `public` 선언 또는 `SerializeField` 어트리뷰트를 통해 유니티 에디터와 직렬화(Serialization)할 수 있습니다. 즉, 유니티 에디터를 통해 StorableValue를 관리할 수 있습니다.
+
+```c#
+public StorableFloat bgmVolume; // 유니티 직렬화에 의해 자동으로 인스턴스 생성
+[SerializeField] StorableFloat sfxVolume = new StorableFloat("sfxVolum", .7f);
+```
+
+직렬화된 변수를 초기화하지 않으면, 유니티 직렬화에 의해 자동으로 인스턴스가 생성됩니다. 이때 키 필드는 변수명과 동일하게 설정되는데, 왠만하면 사용 의도에 맞게 인스펙터에서 변경해서 사용하길 추천합니다. 인스펙터에서 키 필드은 비어있을 수 없습니다. 만약 그렇다면, 유니티 에디터에 의해 변수명과 동일한 값으로 자동 설정됩니다.
+
+[![img](./Docs/VolumeController.png?raw=true)](./Docs/VolumeController.png)
+
+직렬화된 StorableValue는 에디터에서 키(K), 값(V), 초기값(D), 저장값(S) 순으로 보여집니다. 이중 키와 값 필드는 에디터를 통해 수정 가능하지만, 초기값과 저장값 필드는 수정 불가능합니다. 이는 의도된 것으로, 사용자는 키와 값 필드만 관리하고 신경쓰면 나머지 귀찮은 작업은 StorableValue가 알아서 처리합니다. 초기값 필드는 자동으로 세팅이 되고, 저장값 필드는 값을 확인하는 용도로 사용합니다.
+
+#### 초기값 필드
+
+에디터의 에딧 모드에는 값 필드와 자동으로 동기화되지만, 플레이 모드에는 플레이 직전의 값이 유지됩니다. 같은 방식으로, 빌드 전의 최종 초기값이 빌드 후의 초기값으로 유지됩니다. 초기값은 플레이 중 또는 빌드 후 변경할 수 없습니다. 이러한 사용 시나리오는 '초기값'이라는 단어가 의미하는 용도를 최대한 반영한 결과입니다. 참고로 값을 초기화하기 위해서는 스크립트를 통해 `Revert()` 메소드를 호출하세요.
+
+#### 저장값 필드
+
+저장값 필드는 수정 불가능하며 PlayerPrefs에 저장된 값을 직접 보여줍니다. 즉, 저장값 필드는 읽기 전용으로, 유니티의 직렬화를 이용하지 않습니다. 덕분에 플레이 중 값을 저장하여 저장값 필드가 갱신된 경우, 플레이가 종료된 후에도 그 값이 필드에 유지되어 에디터가 의도치 않게 더티(dirty) 표시가 되는 상황이 발생하지 않습니다. 저장값 필드는 PlayerPrefs에 저장되어 있는 경우 푸른색, 그렇지 않은 경우 붉은색으로 표시됩니다. 참고로 값을 저장하고 불러오기 위해서는 스크립트를 통해 `Save()`, `Load()` 메소드를 호출하세요.
+
+### Value Property
+
+위에서 따로 언급하진 않았지만, StorableValue의 값에 접근하기 위해서는 `Value` 프로퍼티를 사용합니다.
+
+```c#
+bgmVolume.Value = .7f;
+```
+
+값을 얻을 때는 묵시적 형변환에 의해 `Value` 프로퍼티를 생략할 수 있습니다.
+
+```c#
+Debug.Log(bgmVolume); // Same as "Debug.Log(bgmVolume.Value);"
+```
+
+####Getter/Setter Functions
+
+일반적인 프로퍼티를 선언할 때, get/set 접근자를 사용하여 값을 읽거나 쓰는 메커니즘을 정의했던 것처럼, StorableValue를 선언할 때도, 값을 읽거나 쓰는 메커니즘을 정의할 수 있습니다. 생성자의 2, 3번째 인자로 각각 get/set 델리게이트(delegate)를 정의하여 사용합니다. 이 인자들은 null일 수 없습니다. 아래 예제는 voiceVolume의 값을 쓸 때, 0과 1 사이로 고정합니다.
+
+```c#
+StorableFloat voiceVolume = new StorableFloat("voiceVolume", .7f, 
+                                             v => v, // Getter function
+                                             v => Mathf.Clamp01(v) // Setter function
+                                             );
+```
+
+### Events
+
+StorableValue는 값의 변화에 따른 이벤트가 정의되어 있습니다.
+
+#### Changed
+
+값이 변할 때마다 불립니다.
+
+```c#
+voiceVolume.Changed += v => { Debug.Log(String.Format("Value changed to {0}", v)); };
+```
+
+#### Saved/Loaded/Reverted
+
+각각 `Save()`/`Load()`/`Revert()` 메소드가 호출될 때 불립니다.
+
+```c#
+voiceVolume.Saved += v => { Debug.Log(String.Format("Value saved to {0}", v)); };
+voiceVolume.Loaded += v => { Debug.Log(String.Format("Value loaded to {0}", v)); };
+voiceVolume.Reverted += v => { Debug.Log(String.Format("Value reverted to {0}", v)); };
+```
+
+### Custom StorableEnum
+
+개인적으로 정의한 enum에 저장 기능을 추가하고 싶다면, 아래 예제처럼 `StorableEnum<T>`를 상속하는 클래스를 정의하여 이용하면 됩니다. 유니티 인스펙터를 이용하고 싶다면 `StorableEnumDrawer<T>` 클래스를 상속하는 클래스도 정의하세요.
+
+```c#
+[System.Flags] public enum VolumeControl { BGM, SFX, VOICE };
+
+public class StorableVolumeControl : StorableEnum<VolumeControl> { }
+
+#if UNITY_EDITOR
+[UnityEditor.CustomPropertyDrawer(typeof(StorableVolumeControl))]
+public class StorableVolumeControlDrawer : StorableEnumDrawer<VolumeControl> { }
+#endif
+```
+
