@@ -2,7 +2,6 @@
 
 namespace Mmisman.StorableValue
 {
-	[System.Serializable]
 	public class StorableEnum<T> : StorableValue<T> where T : struct
 	{
 		/// <summary>
