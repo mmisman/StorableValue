@@ -121,7 +121,7 @@ bgmVolume.Value = .7f;
 Debug.Log(bgmVolume); // Same as "Debug.Log(bgmVolume.Value);"
 ```
 
-####Getter/Setter Functions
+#### Getter/Setter Functions
 
 일반적인 프로퍼티를 선언할 때, get/set 접근자를 사용하여 값을 읽거나 쓰는 메커니즘을 정의했던 것처럼, StorableValue를 선언할 때도, 값을 읽거나 쓰는 메커니즘을 정의할 수 있습니다. 생성자의 2, 3번째 인자로 각각 get/set 델리게이트(delegate)를 정의하여 사용합니다. 이 인자들은 null일 수 없습니다. 아래 예제는 voiceVolume의 값을 쓸 때, 0과 1 사이로 고정합니다.
 
