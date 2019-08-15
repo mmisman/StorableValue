@@ -1,9 +1,13 @@
 {
   "name": "com.mmisman.storable-value",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "displayName": "Storable Value",
-  "description": "A set of interfaces that helps you save, load and revert values easily.",
-  "keywords": [],
+  "description": "A set of interfaces that helps you easily save, load and revert various types of values.",
+  "keywords": [
+  	"save",
+  	"load",
+  	"revert"
+  ],
   "author": {
     "name": "Jungman Chung",
     "email": "mmisman@me.com",
