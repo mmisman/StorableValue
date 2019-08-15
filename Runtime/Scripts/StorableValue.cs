@@ -69,19 +69,19 @@ namespace Mmisman.StorableValue
 		/// <summary>
 		/// Occurs when <see cref="Value"/> is changed.
 		/// </summary>
-		event System.Action<T> Changed;
+		public event System.Action<T> Changed;
 		/// <summary>
 		/// Occurs when <see cref="Save"/> is called.
 		/// </summary>
-		event System.Action<T> Saved;
+		public event System.Action<T> Saved;
 		/// <summary>
 		/// Occurs when <see cref="Load"/> is called.
 		/// </summary>
-		event System.Action<T> Loaded;
+		public event System.Action<T> Loaded;
 		/// <summary>
 		/// Occurs when <see cref="Revert"/> is called.
 		/// </summary>
-		event System.Action<T> Reverted;
+		public event System.Action<T> Reverted;
 
 		/// <summary>
 		/// Stores <see cref="Value"/> in <see cref="PlayerPrefs"/>.
