@@ -1,6 +1,6 @@
 {
   "name": "com.mmisman.storable-value",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "displayName": "Storable Value",
   "description": "A set of interfaces that helps you easily save, load and revert various types of values.",
   "keywords": [
